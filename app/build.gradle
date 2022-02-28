@@ -1,0 +1,42 @@
+plugins {
+    id 'com.android.library'
+}
+
+def cmd_gitVersionTag = 'git describe --tags --dirty'
+
+android {
+    compileSdk 32
+    ndkVersion '22.1.7171670'
+
+    defaultConfig {
+        minSdk 21
+        targetSdk 32
+
+        consumerProguardFiles "consumer-rules.pro" // 保留AAR混淆配置
+
+        externalNativeBuild {
+            cmake {
+                abiFilters 'armeabi-v7a', 'arm64-v8a' // ABIs编译配置
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.18.1"
+        }
+    }
+
+    libraryVariants.all {
+        outputs.forEach {
+            it.outputFileName = "QTF_" + cmd_gitVersionTag.execute().text.trim() + ".aar"
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+}
